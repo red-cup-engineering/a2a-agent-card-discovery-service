@@ -1,0 +1,49 @@
+{
+  "name": "@red-cup-engineering/a2a-agent-card-discovery-service",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./types/agent-card.d.mts",
+      "import": "./src/discover-agent-card.mjs"
+    }
+  },
+  "scripts": {
+    "check": "node --check src/discover-agent-card.mjs && node --check test/discover-agent-card.test.mjs",
+    "test": "node --test",
+    "verify": "npm run check && npm test"
+  },
+  "dependencies": {
+    "@a2a-js/sdk": "1.0.0-beta.0",
+    "jose": "6.2.3"
+  },
+  "x-agentic-metro-enterprise": {
+    "node-id": "a2a-agent-card-discovery-service",
+    "organizational-kind": "public-protocol-provider",
+    "operation-catalog": {
+      "discover-signed-agent-card": {
+        "protocol": "A2A 1.0",
+        "legacyCompatibility": false
+      }
+    }
+  },
+  "x-semiotic-voxel": {
+    "profile": "org.harmonious-union.semiotic-voxel.v1",
+    "owner": "red-cup-engineering",
+    "kind": "capability-cell",
+    "actor": "urn:ame:a2a-agent-card-discovery-service",
+    "operations": [
+      "discover-signed-agent-card"
+    ],
+    "capabilities": [
+      {
+        "capability": "a2a-agent-card-discovery-service",
+        "faces": [
+          "discover-signed-agent-card"
+        ]
+      }
+    ],
+    "package": "@red-cup-engineering/a2a-agent-card-discovery-service"
+  }
+}
