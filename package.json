@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@a2a-js/sdk": "1.0.0-beta.0",
+    "@lenticule-science/rmn-semantic-conformance-die": "6.0.0",
     "jose": "6.2.3"
   },
   "x-agentic-metro-enterprise": {

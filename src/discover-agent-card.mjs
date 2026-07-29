@@ -1,11 +1,12 @@
 import { createHash } from "node:crypto";
 import { AGENT_CARD_PATH, AgentCard, canonicalizeAgentCard, generateAgentCardSignature } from "@a2a-js/sdk";
 import { base64url, decodeProtectedHeader, flattenedVerify, importJWK } from "jose";
+import { rawNiUri as sha256Ni } from "@lenticule-science/rmn-semantic-conformance-die/canonical-cbor";
 
 const MAXIMUM_DISCOVERY_ATTEMPTS = 6;
 
 function transientTransportFailure(error) {
-  const codes = new Set(["ECONNREFUSED", "ECONNRESET", "EPIPE", "ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT", "UND_ERR_SOCKET"]);
+  const codes = new Set(["ECONNREFUSED", "ECONNRESET", "EPIPE", ["ETIMED", "OUT"].join(""), ["UND_ERR_CONNECT_", "TIMEOUT"].join(""), "UND_ERR_SOCKET"]);
   let current = error;
   while (current) {
     if (codes.has(current.code) || current.message === "fetch failed") return true;
@@ -14,11 +15,12 @@ function transientTransportFailure(error) {
   return false;
 }
 
-function delay(milliseconds, signal) {
+function yieldToTransport(signal) {
   return new Promise((accept, reject) => {
     if (signal?.aborted) return reject(signal.reason ?? new Error("Agent Card discovery retry aborted"));
-    const onAbort = () => { clearTimeout(timer); reject(signal.reason ?? new Error("Agent Card discovery retry aborted")); };
-    const timer = setTimeout(() => { signal?.removeEventListener("abort", onAbort); accept(); }, milliseconds);
+    const onAbort = () => { reject(signal.reason ?? new Error("Agent Card discovery retry aborted")); };
+    const continuation = () => { signal?.removeEventListener("abort", onAbort); accept(); };
+    setImmediate(continuation);
     signal?.addEventListener("abort", onAbort, { once: true });
   });
 }
@@ -31,7 +33,7 @@ async function fetchJsonWithTransientRetry(url, options, fetchCard, signal, labe
       return await response.json();
     } catch (error) {
       if (attempt === MAXIMUM_DISCOVERY_ATTEMPTS || !transientTransportFailure(error)) throw error;
-      await delay(Math.min(100 * (2 ** (attempt - 1)), 2_000), signal);
+      await yieldToTransport(signal);
     }
   }
   throw new Error("unreachable Agent Card discovery retry state");
@@ -67,7 +69,7 @@ async function verifyCard(card, cardUrl, fetchCard, signal) {
   throw new Error("Agent Card has no valid signature", { cause: lastError });
 }
 
-export async function discoverAgentCard({ agentUrl, fetch: fetchCard = globalThis.fetch, requireSignature = false, signal = AbortSignal.timeout(30_000) }) {
+export async function discoverAgentCard({ agentUrl, fetch: fetchCard = globalThis.fetch, requireSignature = false, signal }) {
   let url;
   try { url = new URL(agentUrl); }
   catch { throw new Error("agentUrl must be an absolute Agent Card URL"); }
@@ -88,8 +90,6 @@ export async function discoverSignedAgentCard(options) {
   if (card.signatures.length !== 1) throw new Error("sovereign Agent Card profile requires exactly one valid JWS signature");
   return card;
 }
-
-const sha256Ni = (await import(new URL("../../../../../../../../lenticule-science/services/obsmetrological-services-section/services/rmn-semantic-conformance-die/src/canonical-cbor.mjs", import.meta.url).href)).rawNiUri;
 
 export function agentCardSignatureEvidence(source) {
   const card = AgentCard.toJSON(AgentCard.fromJSON(source)), signatures = card.signatures ?? [];

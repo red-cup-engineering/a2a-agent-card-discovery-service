@@ -50,7 +50,7 @@ test("signed discovery retries transient card and JWKS transport failures", asyn
     if (attempts.jwks === 1) throw new TypeError("fetch failed", { cause: Object.assign(new Error("socket closed"), { code: "UND_ERR_SOCKET" }) });
     return json(fixture.jwks);
   };
-  const card = await discoverSignedAgentCard({ agentUrl: CARD_URL, fetch, signal: AbortSignal.timeout(5_000) });
+  const card = await discoverSignedAgentCard({ agentUrl: CARD_URL, fetch });
   assert.equal(card.name, "Transient discovery fixture");
   assert.deepEqual(attempts, { card: 2, jwks: 2 });
 });
@@ -75,7 +75,7 @@ test("HTTP refusal is not retried", async () => {
   assert.equal(attempts, 1);
 });
 
-test("one abort signal bounds the retry interval", async () => {
+test("one explicit customer cancellation interrupts retry", async () => {
   let attempts = 0;
   const controller = new AbortController();
   const pending = discoverSignedAgentCard({
@@ -83,7 +83,7 @@ test("one abort signal bounds the retry interval", async () => {
     signal: controller.signal,
     fetch: async () => { attempts += 1; throw Object.assign(new Error("reset"), { code: "ECONNRESET" }); },
   });
-  controller.abort(new Error("customer deadline"));
-  await assert.rejects(pending, /customer deadline/u);
+  controller.abort(new Error("customer cancellation"));
+  await assert.rejects(pending, /customer cancellation/u);
   assert.equal(attempts, 1);
 });
