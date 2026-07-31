@@ -16,35 +16,7 @@
   },
   "dependencies": {
     "@a2a-js/sdk": "1.0.0-beta.0",
-    "@lenticule-science/rmn-semantic-conformance-die": "6.0.0",
+    "@lenticule-science/rmn-semantic-conformance-die": "6.0.1",
     "jose": "6.2.3"
-  },
-  "x-agentic-metro-enterprise": {
-    "node-id": "a2a-agent-card-discovery-service",
-    "organizational-kind": "public-protocol-provider",
-    "operation-catalog": {
-      "discover-signed-agent-card": {
-        "protocol": "A2A 1.0",
-        "legacyCompatibility": false
-      }
-    }
-  },
-  "x-semiotic-voxel": {
-    "profile": "org.harmonious-union.semiotic-voxel.v1",
-    "owner": "red-cup-engineering",
-    "kind": "capability-cell",
-    "actor": "urn:ame:a2a-agent-card-discovery-service",
-    "operations": [
-      "discover-signed-agent-card"
-    ],
-    "capabilities": [
-      {
-        "capability": "a2a-agent-card-discovery-service",
-        "faces": [
-          "discover-signed-agent-card"
-        ]
-      }
-    ],
-    "package": "@red-cup-engineering/a2a-agent-card-discovery-service"
   }
 }
