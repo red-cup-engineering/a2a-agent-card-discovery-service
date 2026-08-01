@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { AGENT_CARD_PATH, AgentCard, canonicalizeAgentCard, generateAgentCardSignature } from "@a2a-js/sdk";
 import { base64url, decodeProtectedHeader, flattenedVerify, importJWK } from "jose";
-import { rawNiUri as sha256Ni } from "@lenticule-science/rmn-semantic-conformance-die/canonical-cbor";
+import { rawNiUri as sha256Ni } from "@red-cup-engineering/rmn-semantic-conformance-die/canonical-cbor";
 
 const MAXIMUM_DISCOVERY_ATTEMPTS = 6;
 
