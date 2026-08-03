@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { AGENT_CARD_PATH, AgentCard, canonicalizeAgentCard, generateAgentCardSignature } from "@a2a-js/sdk";
 import { base64url, decodeProtectedHeader, flattenedVerify, importJWK } from "jose";
-import { rawNiUri as sha256Ni } from "@red-cup-engineering/rmn-semantic-conformance-die/canonical-cbor";
+import { makeNiUri } from "@red-cup-engineering/ni-uri-services-section";
+import { admitAgentCardDiscoveryRefusal, admitAgentCardDiscoveryRequest, admitAgentCardDiscoveryResult } from "./carriers.mjs";
 
 const MAXIMUM_DISCOVERY_ATTEMPTS = 6;
 
@@ -91,6 +92,18 @@ export async function discoverSignedAgentCard(options) {
   return card;
 }
 
+export async function discoverAgentCardExchange(request, { fetch } = {}) {
+  try {
+    admitAgentCardDiscoveryRequest(request);
+    const card = await discoverAgentCard({ ...request, ...(fetch ? { fetch } : {}) });
+    const projected = AgentCard.toJSON(card);
+    const result = Object.freeze({ ...projected, skills: projected.skills ?? Object.freeze([...card.skills]) });
+    return Object.freeze({ outcome: "result", value: admitAgentCardDiscoveryResult(result) });
+  } catch (error) {
+    return Object.freeze({ outcome: "refusal", value: admitAgentCardDiscoveryRefusal({ type: "AgentCardDiscoveryRefusal", code: error.code ?? "agent-card-discovery-refused", reason: error instanceof Error ? error.message : String(error), agentUrl: typeof request?.agentUrl === "string" ? request.agentUrl : "" }) });
+  }
+}
+
 export function agentCardSignatureEvidence(source) {
   const card = AgentCard.toJSON(AgentCard.fromJSON(source)), signatures = card.signatures ?? [];
   if (signatures.length !== 1) throw new Error("signed Agent Card evidence requires exactly one JWS signature");
@@ -98,8 +111,8 @@ export function agentCardSignatureEvidence(source) {
   const signature = signatures[0], header = decodeProtectedHeader(signature);
   if (!header.kid || !header.alg || !header.jku || header.typ !== "JOSE") throw new Error("Agent Card signature protected header is incomplete");
   return {
-    card: sha256Ni(Buffer.from(canonicalizeAgentCard(card), "utf8")),
-    signature: sha256Ni(Buffer.from(canonicalizeAgentCard(signature), "utf8")),
+    card: makeNiUri(Buffer.from(canonicalizeAgentCard(card), "utf8")),
+    signature: makeNiUri(Buffer.from(canonicalizeAgentCard(signature), "utf8")),
     kid: header.kid,
     algorithm: header.alg,
     jwks: header.jku,

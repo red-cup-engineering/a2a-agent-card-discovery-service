@@ -5,7 +5,8 @@ import test from "node:test";
 import { generateAgentCardSignature } from "@a2a-js/sdk";
 import { exportJWK } from "jose";
 
-import { discoverSignedAgentCard } from "../src/discover-agent-card.mjs";
+import { discoverAgentCardExchange, discoverSignedAgentCard } from "../src/discover-agent-card.mjs";
+import { AGENT_CARD_DISCOVERY_EAVT } from "../src/carriers.mjs";
 
 const BASE_URL = "https://provider.invalid";
 const CARD_URL = `${BASE_URL}/.well-known/agent-card.json`;
@@ -86,4 +87,15 @@ test("one explicit customer cancellation interrupts retry", async () => {
   controller.abort(new Error("customer cancellation"));
   await assert.rejects(pending, /customer cancellation/u);
   assert.equal(attempts, 1);
+});
+
+test("the JSON carrier returns an admitted result or explicit refusal", async () => {
+  const result = await discoverAgentCardExchange({ agentUrl: CARD_URL }, { fetch: async () => json(unsignedCard()) });
+  assert.equal(result.outcome, "result");
+  assert.equal(result.value.name, "Transient discovery fixture");
+  assert.deepEqual(result.value.skills, []);
+  const refusal = await discoverAgentCardExchange({ agentUrl: "not-an-absolute-url" });
+  assert.equal(refusal.outcome, "refusal");
+  assert.equal(refusal.value.type, "AgentCardDiscoveryRefusal");
+  assert.equal(AGENT_CARD_DISCOVERY_EAVT.derived, true);
 });
