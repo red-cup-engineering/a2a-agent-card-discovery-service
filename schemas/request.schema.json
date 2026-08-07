@@ -1,1 +1,0 @@
-{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"urn:red-cup-engineering:schema:a2a-agent-card-discovery-request:1","type":"object","required":["agentUrl"],"properties":{"agentUrl":{"type":"string","minLength":1},"requireSignature":{"type":"boolean"}},"additionalProperties":false}
