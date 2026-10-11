@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { AGENT_CARD_PATH, AgentCard, canonicalizeAgentCard, generateAgentCardSignature } from "@a2a-js/sdk";
 import { base64url, decodeProtectedHeader, flattenedVerify, importJWK } from "jose";
-import { makeNiUri } from "@red-cup-engineering/ni-uri-services-section";
+import { makeNiUri } from "@red-cup-engineering/uri-services-section/ni-uri";
 import { admitAgentCardDiscoveryRefusal, admitAgentCardDiscoveryRequest, admitAgentCardDiscoveryResult } from "./carriers.mjs";
 
 const MAXIMUM_DISCOVERY_ATTEMPTS = 6;
