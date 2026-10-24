@@ -2,6 +2,7 @@ name: Repository first-visit audit
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 permissions:
@@ -9,4 +10,4 @@ permissions:
 
 jobs:
   frontdoor:
-    uses: red-cup-engineering/repository-norms/.github/workflows/frontdoor.yml@97767b274202af7ff0f95172d1234721da64354f
+    uses: red-cup-engineering/repository-norms/.github/workflows/frontdoor.yml@e8e19fcb2450ed679b8b61f7bc82cff59e683b91
