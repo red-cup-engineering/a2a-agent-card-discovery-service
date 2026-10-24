@@ -27,10 +27,10 @@
   },
   "dependencies": {
     "@a2a-js/sdk": "1.0.0-beta.0",
-    "@red-cup-engineering/json-schema-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/json-schema-services-section": "workspace:*",
     "@red-cup-engineering/semantic-content-identify-service": "workspace:*",
     "jose": "6.2.3",
-    "@red-cup-engineering/uri-engineering-services-section": "workspace:*"
+    "@red-cup-engineering/uri-services-section": "workspace:*"
   },
   "license": "MIT",
   "funding": {
